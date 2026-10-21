@@ -20,21 +20,24 @@ const {chromium} = require('playwright');
   }
   for (const dpi of [1,1.25,1.5,2]) {
    const page=await pageFor('popup',dpi,200,36);
-   await page.clock.install({time:new Date(2026,1,15,12)});
+   await page.clock.setFixedTime(new Date(2026,1,15,12));
+   await page.evaluate(()=>document.fonts.ready);
    const deliver=data=>page.evaluate(data=>window.deliver(data),data);
    await deliver({type:'calendar',revision:1,firstDay:0,locale:'ru-RU'});
    async function size() {
-    for(let i=0;i<3;i++) {
-     await page.clock.runFor(100);
+    for(let i=0;i<5;i++) {
+     await page.waitForTimeout(100);
      const command=await page.evaluate(()=>window.messages.filter(m=>m.startsWith('popup:size:')).at(-1));
      const [width,height]=command.slice(11).split(' ').map(Number);
      await page.setViewportSize({width,height});
     }
-    await page.clock.runFor(200);
+    await page.waitForTimeout(200);
     const fit=await page.locator('#calendar').evaluate(host=>{
      const last=host.querySelector('[role="row"]:last-child').getBoundingClientRect();
-     return last.bottom<=innerHeight && host.scrollHeight<=innerHeight;
-    }); assert(fit);
+     return {fits:last.bottom<=innerHeight && host.scrollHeight<=innerHeight,
+      lastRowBottom:last.bottom,viewport:innerHeight,content:host.scrollHeight,
+      transform:getComputedStyle(host).transform,messages:window.messages.filter(m=>m.startsWith('popup:size:'))};
+    }); assert(fit.fits,JSON.stringify({dpi,...fit}));
    }
    await size(); assert.equal(await page.getByRole('gridcell').count(),35);
    assert.equal(await page.locator('#calendar-month').textContent(),'February 2026');
@@ -58,7 +61,7 @@ const {chromium} = require('playwright');
    assert((await page.evaluate(()=>window.messages)).includes('menu:action:4'));
    await deliver({type:'lyrics',revision:4,title:'Recovery',playing:false,lyrics:{state:'temporary',retrySeconds:2}});
    assert(await page.locator('#dock-menu').isHidden());
-   await page.clock.runFor(2100); assert.match(await page.locator('.lyrics-plain').textContent(),/Retrying/);
+   await page.waitForTimeout(2100); assert.match(await page.locator('.lyrics-plain').textContent(),/Retrying/);
    await deliver({type:'lyrics',revision:4,title:'Recovery',playing:false,lyrics:{state:'loading'}});
    assert.equal(await page.locator('.lyrics-plain').textContent(),'Searching…');
    await deliver({type:'lyrics',revision:4,title:'Recovery',playing:false,lyrics:{state:'network',exhausted:true}});

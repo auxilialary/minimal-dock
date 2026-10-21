@@ -105,6 +105,6 @@
         locale = 'en-US'; firstDay = data.firstDay ?? 1; hour12 = data.hour12;
         host.hidden = false;
         if (opening) { selected = shown = new Date(); host.classList.remove('popup-enter'); void host.offsetWidth; host.classList.add('popup-enter'); }
-        render(opening); tick();
+        tick(); render(opening);
     });
 })();

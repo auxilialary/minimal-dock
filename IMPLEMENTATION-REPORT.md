@@ -28,7 +28,8 @@ without checking whether native bounds had arrived, and native DIP conversion
 rounded to nearest physical pixels. Font/initial viewport changes were likewise
 unobserved.
 
-The calendar now remeasures on ResizeObserver, viewport resize, and font readiness,
+The calendar now fills its header before the first measurement and remeasures
+on ResizeObserver, viewport resize, and font readiness,
 uses intrinsic scroll height plus two DIP of contour clearance, and deduplicates
 size messages per revision. The initial acknowledgement carries actual viewport
 dimensions; native code rejects stale bounds and waits for a matching resize
