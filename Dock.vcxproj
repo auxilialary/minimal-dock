@@ -154,7 +154,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SystemStatus.cpp" />
     <ClCompile Include="src\media\MediaService.cpp" />
     <ClCompile Include="src\media\LyricsService.cpp" />
     <ClCompile Include="src\app\ApplicationMedia.cpp" />

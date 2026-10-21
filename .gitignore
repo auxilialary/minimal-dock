@@ -52,3 +52,4 @@ screenshots/
 credentials*
 secrets*
 graphify-out/
+artifacts/

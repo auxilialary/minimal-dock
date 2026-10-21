@@ -10,5 +10,5 @@ if errorlevel 1 (
 )
 nuget restore packages.config -PackagesDirectory packages -NonInteractive
 if errorlevel 1 exit /b 1
-msbuild Dock.vcxproj /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:WarningLevel=Level4 /p:TreatWarningAsError=true /nologo
+msbuild Dock.vcxproj /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:WarningLevel=Level4 /p:TreatWarningAsError=true /nologo %*
 exit /b %errorlevel%

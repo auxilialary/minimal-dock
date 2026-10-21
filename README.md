@@ -1,96 +1,61 @@
 # Glass Split
 
-Glass Split is a Windows taskbar replacement written in C++ with a WebView2
-interface. It uses three independent glass islands for system controls,
-applications, and media. The project is still under development.
+Glass Split is my Windows taskbar replacement, written in C++ with a WebView2
+interface. It splits the desktop controls into three glass islands: system
+controls on the right, applications in the center, and media on the left.
 
 ## Features
 
-- Centered applications dock with hover magnification and window activation.
-- GSMTC Now Playing controls and synchronized lyrics from LRCLIB.
-- Application volume mixer and calendar.
+- An applications dock with hover magnification and window switching.
+- A volume mixer, clock, and calendar.
+- Now Playing information and synchronized lyrics from LRCLIB.
 - Always Visible, Auto Hide, and Smart Hide modes.
-- Optional Windows autostart from the context menu.
-- GPU glass blur, a watchdog, and taskbar restoration on exit or failure.
+- Optional startup with Windows, available from the context menu.
 
-## Requirements
+## Download
 
-- Windows 11 is the intended desktop environment. The build targets the Windows
-  10 SDK family; other Windows versions have not been verified.
-- Microsoft Edge WebView2 Evergreen Runtime.
-- For building: Visual Studio 2026 or Build Tools with Desktop development with
-  C++, MSVC v145, and a Windows 10/11 SDK. The project selects SDK version 10.0,
-  using an installed compatible SDK.
-- NuGet CLI on PATH for the build script.
+Download `GlassSplit-Windows-x64.zip` from
+[GitHub Releases](https://github.com/auxilialary/minimal-dock/releases).
+The rolling **Development build** prerelease contains the latest successful
+build from `main`.
 
-The native dependencies are pinned in `packages.config`: WebView2 SDK
-1.0.4258.31 and Windows Implementation Library 1.0.260126.7.
+Extract the ZIP and run `GlassSplit\Dock.exe`. Keep the DLLs and `ui` folder
+beside the executable.
 
-## Building
+The [WebView2 Evergreen Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
+must be installed. The portable ZIP includes the Microsoft C++ runtime DLLs.
 
-From a command prompt in the project directory:
+## Build
+
+Install Visual Studio 2026 or its Build Tools with Desktop development with C++,
+MSVC v145, and a Windows 10/11 SDK. Install the NuGet CLI and put it on `PATH`.
+
+From a command prompt in the repository:
 
 ```bat
 build.cmd
 ```
 
-The script finds Visual Studio, restores NuGet packages, and rebuilds Release
-x64 with warning level 4 and warnings treated as errors. Output goes to
-`x64\Release`. You can also open `Dock.slnx` in Visual Studio after restoring
-`packages.config` into the `packages` directory.
+The script locates Visual Studio, restores the pinned packages from
+`packages.config` into `packages`, and builds Release x64 with `/W4 /WX`.
+The output is in `x64\Release`, including the UI assets.
 
-Source builds need the matching `ui` assets alongside `Dock.exe`. The project
-copies them into an adjacent `ui` directory after building. Keep that directory
-with the executable when moving a build.
-
-## Running and exiting
-
-Run `x64\Release\Dock.exe`. The program hides the Windows taskbar while active.
-Only one instance runs per session.
-
-Right-click the system island for visibility settings, the optional
-`Start with Windows` setting, and the exit item (`Закрыть Dock`). Exit through
-that menu to restore the taskbar. A watchdog also attempts restoration if the
-main process fails. Autostart is opt-in and follows the executable's location.
-
-## Tests
-
-Native regression runners are in `diagnostics`. Run them from the project root:
+To build in Visual Studio instead, restore the dependencies first:
 
 ```bat
-diagnostics\run-native-tests.cmd
-diagnostics\run-media-tests.cmd
-diagnostics\run-lyrics-tests.cmd
-diagnostics\run-popup-audio-tests.cmd
-diagnostics\run-performance-tests.cmd
-diagnostics\run-autostart-tests.cmd
-diagnostics\run-visibility-tests.cmd
+nuget restore packages.config -PackagesDirectory packages -NonInteractive
 ```
 
-Browser tests require Node.js, npm, and Microsoft Edge:
-
-```bat
-npm ci
-npm test
-```
-
-These suites exercise source fixtures and headless UI pages without launching
-the production dock. Connectivity probes and benchmark scripts are separate
-manual tools; benchmarks can launch a diagnostics instance.
+Then open `Dock.slnx` and select Release x64.
 
 ## Notes
 
-Media controls depend on the player publishing GSMTC metadata. Some players
-report the uploader as the artist. Lyrics search first uses the inferred artist
-and title, then falls back to the normalized title alone when needed. Matching
-uses title, duration, and available artist evidence, and leaves ambiguous
-recordings unselected. Each lookup makes at most two requests.
+Windows 11 is the intended desktop environment. The project is still in
+development, and the menus include some Russian labels.
 
-Lyrics availability depends on LRCLIB coverage and network availability. Rate
-limits and service outages are reported separately from missing lyrics. Cached
-results and server cooldowns can delay another lookup. There is no background
-lyrics polling.
+Lyrics depend on LRCLIB coverage and network access. Media information depends
+on what the player exposes through Windows media sessions.
 
-The interface includes Russian menu labels. Desktop behavior can vary with
-Windows versions, multiple monitors, DPI settings, and media applications.
-This repository contains source and tests, not a packaged binary distribution.
+Glass Split hides the Windows taskbar while running. Right-click the system
+island and choose `Закрыть Dock` to exit and restore it. A watchdog also attempts
+to restore the taskbar if the main process fails.
