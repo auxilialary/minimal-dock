@@ -98,6 +98,10 @@ Run Release x64 with /W4 /WX, diagnostics/run-ci-tests.ps1, npm test,
 diagnostics/verify-ui.cjs, and diagnostics/package-portable.ps1. Native and browser
 regressions cover recovery, cancellation, matching/search budgets, isolated order
 persistence, calendar geometry, gesture handling, menu and popup exclusivity.
+Lyrics timing assertions use an explicitly advanced browser clock, so a slow
+hosted runner cannot advance playback between the first-line assertion and its
+presentation acknowledgement. Calendar first-opening checks wait for fonts and
+actual layout settlement and log geometry if a fit check fails.
 Mock media/audio tests do not demonstrate actual tray functionality.
 
 Before using the release as a desktop replacement, manually inspect first native
@@ -131,6 +135,7 @@ playback changed, taskbar visibility changed, or startup setting written by test
 - `diagnostics/interaction-tests.cjs`
 - `diagnostics/lyrics-recovery-fixtures.h`
 - `diagnostics/lyrics-tests.cpp`
+- `diagnostics/lyrics-ui-tests.cjs`
 - `diagnostics/native-tests.cpp`
 - `diagnostics/refinement-tests.cjs`
 - `diagnostics/tray-feasibility.ps1`
