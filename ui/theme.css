@@ -1,0 +1,231 @@
+:root {
+    color-scheme: dark;
+    --mixer-max-height: 400px;
+    --mixer-padding: 14px;
+    --mixer-font-size: 12px;
+    --mixer-heading-weight: 600;
+    --mixer-header-gap: 12px;
+    --mixer-row-padding: 8px;
+    --mixer-row-gap: 6px;
+    --mixer-column-gap: 10px;
+    --mixer-icon-size: 24px;
+    --mixer-control-size: 24px;
+    --mixer-percent-width: 36px;
+    --mixer-glyph-size: 16px;
+    --mixer-stroke: 1.5px;
+    --mixer-track-height: 2px;
+    --mixer-thumb-size: 10px;
+    --mixer-track: rgba(230,237,247,.2);
+    --mixer-fill: #a6b3c6;
+    --mixer-thumb: #e6edf7;
+    --mixer-focus-width: 1px;
+    --mixer-focus-offset: 2px;
+    --mixer-focus-radius: 3px;
+    --mixer-scrollbar: 6px;
+    --mixer-scroll-step: 48;
+    --media-width: 220px;
+    --media-art-size: 36px;
+    --media-padding: 10px;
+    --media-gap: 10px;
+    --media-title-size: 12px;
+    --media-time-size: 11px;
+    --dock-height: 56px;
+    --system-width: 120px;
+    --window-margin: 14px;
+    --window-gap: 16px;
+    --apps-padding-total: 20px;
+    --app-step: 54px;
+    --app-button-size: 48px;
+    --app-gap: 6px;
+    --apps-min-width: 100px;
+    --dock-radius: 17px;
+    --dock-gap: 12px;
+
+    --dock-surface: transparent;
+    --dock-border-opacity: 0.23;
+    /* Native outline: one physical pixel, white, at this opacity. */
+    --dock-text: #e6edf7;
+    --dock-muted: #a6b3c6;
+    --dock-indicator: #b2caeb;
+
+    --dock-icon-size: 24px;
+    --magnify-max-scale: 1.50;
+    --magnify-radius: 110px;
+    --magnify-response: 18;
+    --magnify-spacing: 1;
+    /* Conservative wave sum <= size*(max-1)*(1+radius/step).
+       Half is <=18.23 DIP; the 48 DIP button supplies 12 DIP of
+       artwork slack. 10 DIP per side retains extra permanent clearance.
+       The native count*step width also retains the final 6 DIP gap. */
+    --apps-side-padding: 10px;
+    --apps-bottom-padding: 4px;
+    --dock-motion-fast: 160ms;
+    --dock-motion-normal: 280ms;
+    --dock-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+    --dock-shadow: none;
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+button {
+    font: inherit;
+    border: 0;
+    background: none;
+    padding: 0;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible {
+    outline: 1px solid var(--dock-indicator);
+    outline-offset: -3px;
+}
+
+.island {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Native Composition owns the island contour and outline. */
+    overflow: hidden;
+    color: var(--dock-text);
+    background: var(--dock-surface);
+    border: 0;
+    padding: 1px; /* Preserve the former CSS border content inset. */
+    box-shadow: var(--dock-shadow);
+}
+
+.apps {
+    display: flex;
+    align-items: center;
+    gap: var(--app-gap);
+    width: 100%;
+    height: 100%;
+    padding: 3px var(--apps-side-padding);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.apps::-webkit-scrollbar { display: none; }
+.apps[hidden], .system[hidden] { display: none; }
+
+.app {
+    position: relative;
+    flex: 0 0 var(--app-button-size);
+    height: var(--app-button-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 11px;
+}
+
+.app-icon {
+    position: absolute;
+    width: var(--dock-icon-size);
+    height: var(--dock-icon-size);
+    object-fit: contain;
+    pointer-events: none;
+}
+.app-fallback {
+    position: absolute;
+    pointer-events: none;
+    width: var(--dock-icon-size);
+    height: var(--dock-icon-size);
+    display: grid;
+    place-items: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dock-text);
+    border-radius: 8px;
+    background: transparent;
+}
+.app-dot {
+    width: 4px;
+    height: 4px;
+    position: absolute;
+    bottom: 1px;
+    left: calc(50% - 2px);
+    border-radius: 50%;
+    background: var(--dock-indicator);
+    opacity: 0;
+    transform: scale(.6);
+}
+.app.active .app-dot {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.system {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 9px;
+    padding: 0 12px;
+}
+.system-action {
+    flex: 0 0 26px;
+    width: 26px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    color: var(--dock-text);
+    border-radius: 8px;
+}
+.system-action svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.separator {
+    height: 17px;
+    width: 1px;
+    flex: 0 0 1px;
+    background: rgba(255,255,255,.13);
+}
+.clock {
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 550;
+    letter-spacing: .15px;
+    min-width: 48px;
+    height: 35px;
+    font-variant-numeric: tabular-nums;
+}
+body[data-role="apps"] .apps { align-items: flex-end; padding-bottom: var(--apps-bottom-padding); }
+.app-icon, .app-fallback { transform-origin: center bottom; }
+
+body[data-role="apps"] .app { flex-shrink: 0; }
+body[data-role="apps"] .apps { justify-content: safe center; }
+
+#media { width: 100%; display: flex; align-items: center; gap: var(--media-gap); padding: 0 var(--media-padding); }
+#media[hidden] { display: none; }
+#media-art { width: var(--media-art-size); height: var(--media-art-size); object-fit: contain; flex: none; }
+.media-copy { min-width: 0; flex: 1; }
+#media-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--media-title-size); }
+#media-time { color: var(--dock-muted); font-size: var(--media-time-size); font-variant-numeric: tabular-nums; }
+:root { --calendar-cell: 30px; --calendar-gap: 5px; }
+
+.media-progress-row { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+#media-progress { flex: 1; min-width: 24px; height: 2px; overflow: hidden; border-radius: 2px; background: rgba(230,237,247,.15); }
+#media-progress-fill { width: 100%; height: 100%; transform: scaleX(0); transform-origin: left; background: linear-gradient(90deg, #8395ad, #b2c5de); border-radius: inherit; }
+#media-progress[hidden] { display: none; }
+#media-time { flex: none; font-size: 9px; opacity: .8; }

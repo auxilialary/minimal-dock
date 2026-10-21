@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{284a04ac-9c3a-40ad-9bcc-29e02ee910af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{b9d234d1-ac8a-42cb-a534-4e2a0a142fcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{2edeab58-be52-4bd2-a57c-4b79732d5b13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\icons">
+      <UniqueIdentifier>{359f7e76-54d0-44d6-ac21-f070bb6a203f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\app">
+      <UniqueIdentifier>{369735e5-7d01-4b30-9a8d-9720d75d1f06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\windows">
+      <UniqueIdentifier>{ff83a0de-fda0-478e-970c-7720ef10dea0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\shell">
+      <UniqueIdentifier>{3abcce8f-8f6c-41da-87aa-0ed19702de15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\web">
+      <UniqueIdentifier>{398ad99b-8bac-441b-be19-202911b37942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\safety">
+      <UniqueIdentifier>{c57a4706-0438-4b49-bae4-22b0e7b2886c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SystemStatus.cpp">
+      <Filter>src\shell</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\windows\WindowMotion.h">
+      <Filter>src\windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
+    <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natstepfilter" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\app\Application.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\windows\DockWindow.cpp">
+      <Filter>src\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\windows\WindowMotion.cpp">
+      <Filter>src\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\windows\WindowTracker.cpp">
+      <Filter>src\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\web\WebBridge.cpp">
+      <Filter>src\web</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\web\WebViewHost.cpp">
+      <Filter>src\web</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\shell\WindowEffects.cpp">
+      <Filter>src\shell</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\shell\TaskbarManager.cpp">
+      <Filter>src\shell</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\safety\Watchdog.cpp">
+      <Filter>src\safety</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\app\Application.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\windows\DockWindow.h">
+      <Filter>src\windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\windows\WindowTracker.h">
+      <Filter>src\windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\web\WebBridge.h">
+      <Filter>src\web</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\web\WebViewHost.h">
+      <Filter>src\web</Filter>
+    </ClInclude>
+    <ClInclude Include="src\web\MouseInput.h">
+      <Filter>src\web</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\shell\TaskbarManager.h">
+      <Filter>src\shell</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\safety\Watchdog.h">
+      <Filter>src\safety</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ui\index.html">
+      <Filter>ui</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ui\theme.css">
+      <Filter>ui</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ui\motion.css">
+      <Filter>ui</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ui\app.js">
+      <Filter>ui</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ui\dock.js">
+      <Filter>ui</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ui\system.js">
+      <Filter>ui</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\app\Popups.cpp"><Filter>src\app</Filter></ClCompile>
+    <ClCompile Include="src\audio\AudioMixer.cpp"><Filter>src\audio</Filter></ClCompile>
+    <ClInclude Include="src\app\Popups.h"><Filter>src\app</Filter></ClInclude>
+    <ClInclude Include="src\audio\AudioMixer.h"><Filter>src\audio</Filter></ClInclude>
+    <ClInclude Include="src\audio\AudioModel.h"><Filter>src\audio</Filter></ClInclude>
+    <ClInclude Include="src\audio\AudioNotifications.h"><Filter>src\audio</Filter></ClInclude>
+    <ClInclude Include="src\windows\PopupLayout.h"><Filter>src\windows</Filter></ClInclude>
+    <None Include="ui\popup.js"><Filter>ui</Filter></None>
+    <None Include="ui\popup.css"><Filter>ui</Filter></None>
+    <None Include="ui\tooltip.js"><Filter>ui</Filter></None>
+  </ItemGroup>
+  <ItemGroup><Filter Include="src\audio"><UniqueIdentifier>{ba941c2d-a7b1-449d-b7de-bcd99ea6a567}</UniqueIdentifier></Filter></ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\app\ApplicationLayout.cpp"><Filter>src\app</Filter></ClCompile>
+    <ClCompile Include="src\app\ApplicationVisibility.cpp"><Filter>src\app</Filter></ClCompile>
+    <ClInclude Include="src\app\VisibilityPolicy.h"><Filter>src\app</Filter></ClInclude>
+    <ClInclude Include="src\windows\EdgeTrigger.h"><Filter>src\windows</Filter></ClInclude>
+  </ItemGroup>
+</Project>

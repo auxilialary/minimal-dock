@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Dock</title>
+    <script>
+        window.dockBoot = { failed: false, modules: new Set() };
+        window.dockReport = detail => {
+            window.dockBoot.failed = true;
+            window.chrome?.webview?.postMessage("ui:error:" + detail);
+        };
+        window.addEventListener("error", event => window.dockReport(
+            (event.error?.stack || event.message) || "Resource failed: " + (event.target.src || event.target.href)), true);
+        window.addEventListener("unhandledrejection", event => window.dockReport(String(event.reason)));
+        window.setTimeout(() => {
+            if (!window.dockPainted) window.dockReport("Rendered UI readiness timed out");
+        }, 10000);
+    </script>
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="motion.css">
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="lyrics.css">
+</head>
+<body>
+    <main class="island" id="island">
+        <section id="apps" class="apps" hidden></section>
+        <section id="system" class="system" hidden>
+            <button class="system-action" id="sound"
+                title="Микшер громкости" aria-label="Звук" aria-haspopup="dialog">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9H4ZM17 9a5 5 0 0 1 0 6M19.5 6a9 9 0 0 1 0 12"/>
+                </svg>
+            </button>
+            <span class="separator"></span>
+            <button class="clock" id="clock"
+                title="ПКМ: меню Dock" aria-label="Время">--:--</button>
+        </section>
+        <section id="media" hidden aria-label="Now Playing">
+            <img id="media-art" alt="" hidden><div class="media-copy"><div id="media-title"></div><div class="media-progress-row"><div id="media-progress" role="progressbar" aria-label="Playback progress" hidden><div id="media-progress-fill"></div></div><time id="media-time"></time></div></div>
+        </section>
+    </main>
+    <aside id="tooltip" role="tooltip" hidden></aside>
+    <section id="mixer" role="dialog" aria-label="Volume mixer" hidden>
+        <header>Volume mixer</header>
+        <p id="audio-error" role="status" hidden></p>
+        <div id="audio-rows" role="region" aria-label="Application audio sessions" tabindex="0"></div>
+    </section>
+    <section id="lyrics" role="dialog" aria-label="Live lyrics" hidden></section>
+    <section id="calendar" role="dialog" aria-label="Calendar" hidden></section>
+    <script src="calendar.js"></script>
+    <script src="tooltip.js"></script>
+    <script src="volume-wheel.js"></script>
+    <script src="popup.js"></script>
+    <script src="lyrics-core.js"></script>
+    <script src="lyrics.js"></script>
+    <script src="media.js"></script>
+    <script src="system.js"></script>
+    <script src="magnification-math.js"></script>
+    <script src="magnification.js"></script>
+    <script src="dock.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

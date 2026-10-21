@@ -1,0 +1,17 @@
+#lyrics { height: 100vh; box-sizing: border-box; padding: 20px 22px 12px; display: flex; flex-direction: column; color: var(--dock-text); font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif; }
+#lyrics[hidden] { display: none; }
+#lyrics header { font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lyrics-artist { font-size: 12px; opacity: .55; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lyrics-viewport { position: relative; flex: 1; min-height: 0; overflow: auto; scrollbar-width: none; text-align: center; margin-top: 12px; mask-image: linear-gradient(transparent, black 12%, black 88%, transparent); overscroll-behavior: contain; }
+.lyrics-viewport::-webkit-scrollbar { display: none; }
+.lyrics-viewport p { font-size: 18px; line-height: 1.55; margin: 18px 8px; opacity: .35; transform: scale(.96); transition: opacity 220ms, transform 220ms; overflow-wrap: anywhere; }
+.lyrics-viewport p.lyric-active { opacity: 1; font-weight: 600; transform: scale(1); }
+.lyrics-synced { padding: 100px 0; }
+.lyrics-plain { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.75; padding: 30px 6px; opacity: .8; }
+#lyrics footer { text-align: center; font-size: 10px; opacity: .35; padding-top: 9px; }
+.lyrics-reduced p { transition: none; }
+#media[role=button] { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .lyrics-viewport p { transition: none; } }
+
+.lyrics-genius { align-self: center; background: none; border: 0; color: inherit; opacity: .55; font: inherit; font-size: 11px; cursor: pointer; }
+.lyrics-genius[hidden] { display: none; }
