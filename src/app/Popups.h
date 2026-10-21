@@ -14,10 +14,12 @@ public:
     void Hide(bool immediate = true);
     void Stop();
     void MediaChanged(const MediaSnapshot& track, HWND anchor);
+    void ShowMenu(std::wstring state, std::function<void(unsigned)> action);
     void FollowMediaAnchor() { if (mode_ == Mode::Lyrics) Position(380, 420); }
     void AudioChanged() { if (MixerOpen()) Publish(); }
     bool MixerOpen() const { return mode_ == Mode::Mixer; }
-    bool Interactive() const { return mode_ == Mode::Mixer || mode_ == Mode::Calendar || mode_ == Mode::Lyrics; }
+    bool MenuOpen() const { return mode_ == Mode::Menu; }
+    bool Interactive() const { return mode_ == Mode::Menu || mode_ == Mode::Mixer || mode_ == Mode::Calendar || mode_ == Mode::Lyrics; }
     HWND Handle() const { return window_.Handle(); }
 private:
     bool EnsureView();
@@ -28,12 +30,16 @@ private:
     static Popups* hookOwner_;
     HHOOK mouseHook_ = nullptr;
     static constexpr UINT OutsideMessage = WM_APP + 74;
+    static constexpr UINT LyricsMessage = WM_APP + 75;
     std::unique_ptr<LyricsService> lyrics_;
     MediaSnapshot track_;
     HWND mediaAnchor_ = nullptr;
     std::wstring lyricsResult_;
     ULONGLONG mediaStamp_ = 0;
-    enum class Mode { Hidden, Tooltip, Mixer, Calendar, Lyrics };
+    enum class Mode { Hidden, Tooltip, Mixer, Calendar, Lyrics, Menu };
+    std::wstring menuState_;
+    std::function<void(unsigned)> menuAction_;
+    POINT menuPoint_{};
     void Message(UINT message, WPARAM wp, LPARAM lp);
     void Publish();
     void PostContent(std::wstring json);

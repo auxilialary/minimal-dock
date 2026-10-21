@@ -50,12 +50,28 @@ Then open `Dock.slnx` and select Release x64.
 
 ## Notes
 
-Windows 11 is the intended desktop environment. The project is still in
-development, and the menus include some Russian labels.
+Windows 11 is the intended desktop environment. The Dock context menu and
+calendar use English labels. Calendar week starts and time formatting follow
+Windows preferences.
+
+Drag application icons horizontally to reorder them, or use Alt+Shift+Left/Right
+on a focused icon. Order is saved per user by application identity (up to 256
+entries, 64 KiB); closed applications retain their relative position. Choose
+Reset App Order from the context menu to restore discovery order.
+
+Live Lyrics automatically retries temporary/network failures up to three times,
+with exponential backoff and server cooldowns. Closing the popup, changing tracks
+or exiting cancels pending retries. Exhaustion exposes a manual Retry action.
+Missing lyrics are not automatically retried.
+
+Notification-area mirroring is not implemented: Windows provides no supported
+complete enumeration or action API for other applications' tray icons. With
+Explorer's taskbar hidden, the local Windows 11 probe exposed no automation
+elements. See [tray feasibility and verification](IMPLEMENTATION-REPORT.md).
 
 Lyrics depend on LRCLIB coverage and network access. Media information depends
 on what the player exposes through Windows media sessions.
 
 Glass Split hides the Windows taskbar while running. Right-click the system
-island and choose `Закрыть Dock` to exit and restore it. A watchdog also attempts
+island and choose `Exit Dock` to exit and restore it. A watchdog also attempts
 to restore the taskbar if the main process fails.

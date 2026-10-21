@@ -5,9 +5,10 @@
 #include "../windows/PopupInteraction.h"
 #include <sstream>
 #include <cmath>
+#include <shellscalingapi.h>
 #include "../web/Performance.h"
 namespace {
-constexpr UINT_PTR ExitTimer = 0x501, LyricsTimer = 0x502;
+constexpr UINT_PTR ExitTimer = 0x501;
 std::wstring Quote(const std::wstring& input) {
     std::wstring out = L"\"";
     const wchar_t digits[] = L"0123456789abcdef";
@@ -41,9 +42,9 @@ bool Popups::EnsureView() {
 }
 void Popups::Message(UINT message, WPARAM wp, LPARAM) {
     if (message == OutsideMessage && wp == revision_ && Interactive()) Hide();
-    if (message == WM_TIMER && wp == LyricsTimer && mode_ == Mode::Lyrics) {
+    if (message == LyricsMessage && mode_ == Mode::Lyrics) {
         auto result = lyrics_->Read();
-        if (!result.empty()) { KillTimer(window_.Handle(), LyricsTimer); lyricsResult_ = std::move(result); PublishLyrics(); }
+        if (!result.empty()) { lyricsResult_ = std::move(result); PublishLyrics(); }
     }
     if (message == WM_MOUSEMOVE || message == WM_MOUSELEAVE)
         PostMessageW(owner_, WM_APP + 71, message, 0);
@@ -70,8 +71,19 @@ void Popups::Position(int width, int height) {
     RECT anchor{}; GetWindowRect(anchorWindow, &anchor);
     MONITORINFO monitor{sizeof(monitor)};
     if (!GetMonitorInfoW(MonitorFromWindow(anchorWindow, MONITOR_DEFAULTTONEAREST), &monitor)) return;
-    const int dpi = static_cast<int>(GetDpiForWindow(anchorWindow));
-    auto scale = [dpi](int dip) { return MulDiv(dip, dpi, 96); };
+    int dpi = static_cast<int>(GetDpiForWindow(anchorWindow));
+    if (mode_ == Mode::Menu) {
+        const auto target = MonitorFromPoint(menuPoint_, MONITOR_DEFAULTTONEAREST);
+        UINT x = 96, y = 96;
+        if (SUCCEEDED(GetDpiForMonitor(target, MDT_EFFECTIVE_DPI, &x, &y))) dpi = static_cast<int>(x);
+        if (!GetMonitorInfoW(target, &monitor)) return;
+    }
+    auto scale = [dpi](int dip) { return static_cast<int>(std::ceil(dip * dpi / 96.0)); };
+    if (mode_ == Mode::Menu) {
+        RECT cursor{menuPoint_.x, menuPoint_.y, menuPoint_.x, menuPoint_.y};
+        window_.Place(CalculatePopup(monitor.rcWork, cursor, menuPoint_.x + scale(width) / 2,
+            scale(width), scale(height), 0), false); return;
+    }
     const int center = mode_ == Mode::Calendar ? anchor.left + static_cast<int>(std::lround(center_ * dpi / 96)) :
         (MixerOpen() || mode_ == Mode::Lyrics) ? (anchor.left + anchor.right) / 2 :
         anchor.left + static_cast<int>(std::lround(center_ * dpi / 96));
@@ -94,6 +106,11 @@ void Popups::Present() {
 }
 bool Popups::Command(const std::wstring& command, const std::vector<RunningApp>& apps) {
     if (!initialized_) return false;
+    if (command.rfind(L"menu:action:", 0) == 0) {
+        unsigned action = 0; std::wistringstream input(command.substr(12));
+        if (mode_ == Mode::Menu && (input >> action)) { auto handler = menuAction_; Hide(); if (handler) handler(action); }
+        return true;
+    }
     if (command == L"lyrics" || command == L"mixer" || command.rfind(L"calendar:", 0) == 0 ||
         (command.rfind(L"tooltip:", 0) == 0 && command != L"tooltip:hide")) {
         Performance::Mark(L"popup.command:" + command.substr(0, command.find(L':')));
@@ -113,8 +130,18 @@ bool Popups::Command(const std::wstring& command, const std::vector<RunningApp>&
     if (command.rfind(L"popup:present:", 0) == 0) {
         unsigned revision = 0; std::wistringstream in(command.substr(14));
         if ((in >> revision) && revision == revision_ && mode_ != Mode::Hidden) {
+            if (mode_ == Mode::Calendar) {
+                int width = 0, height = 0; RECT client{}; GetClientRect(window_.Handle(), &client);
+                const double scale = GetDpiForWindow(window_.Handle()) / 96.0;
+                if (!(in >> width >> height) || std::abs(width * scale - client.right) > scale ||
+                    std::abs(height * scale - client.bottom) > scale) return true;
+            }
             contentReady_ = true; Present();
         }
+        return true;
+    }
+    if (command == L"lyrics:retry") {
+        if (mode_ == Mode::Lyrics && lyrics_) { lyricsResult_.clear(); lyrics_->Request(track_); PublishLyrics(); }
         return true;
     }
     if (command == L"lyrics:genius") {
@@ -131,9 +158,9 @@ bool Popups::Command(const std::wstring& command, const std::vector<RunningApp>&
         if (mode_ == Mode::Lyrics) { Hide(); return true; }
         if (!track_.playing || !IsWindowVisible(mediaAnchor_)) return true;
         Hide(); mode_ = Mode::Lyrics; window_.PopupMode(true);
-        if (!lyrics_) lyrics_ = std::make_unique<LyricsService>();
+        if (!lyrics_) lyrics_ = std::make_unique<LyricsService>(LyricsService::Transport{},
+            [window = window_.Handle()] { PostMessageW(window, LyricsMessage, 0, 0); });
         lyricsResult_.clear(); lyrics_->Request(track_);
-        SetTimer(window_.Handle(), LyricsTimer, 100, nullptr);
         Position(380, 420); Publish(); Present(); return true;
     }
     if (command == L"mixer") {
@@ -177,7 +204,7 @@ bool Popups::Command(const std::wstring& command, const std::vector<RunningApp>&
     if (command.rfind(L"popup:size:", 0) == 0) {
         int width = 0, height = 0; unsigned revision = 0; std::wistringstream in(command.substr(11));
         if (mode_ != Mode::Hidden && (in >> width >> height >> revision) && revision == revision_)
-            Position(mode_ == Mode::Lyrics ? 380 : Interactive() ? 320 : std::clamp(width, 40, 360), std::clamp(height, 32, 480));
+            Position(mode_ == Mode::Menu ? 240 : mode_ == Mode::Lyrics ? 380 : Interactive() ? 320 : std::clamp(width, 40, 360), std::clamp(height, 32, 480));
         return true;
     }
     if (command.rfind(L"audio:", 0) == 0) {
@@ -193,6 +220,7 @@ void Popups::PostContent(std::wstring json) {
     view_.Post(json);
 }
 void Popups::Publish() {
+    if (mode_ == Mode::Menu) { PostContent(menuState_); return; }
     if (mode_ == Mode::Lyrics) { PublishLyrics(); return; }
     if (mode_ == Mode::Tooltip) {
         PostContent(L"{\"type\":\"tooltip\",\"title\":" + Quote(title_) + L"}"); return;
@@ -246,7 +274,6 @@ void Popups::Hide(bool immediate) {
     bool wasMixer = Interactive();
     EndDismiss();
     if (lyrics_) lyrics_->Invalidate();
-    if (window_.Handle()) KillTimer(window_.Handle(), LyricsTimer);
     mode_ = Mode::Hidden; hovered_ = nullptr;
     ++revision_; contentReady_ = false;
     if (owner_) PostMessageW(owner_, WM_APP + 71, WM_MOUSELEAVE, 0);

@@ -223,6 +223,9 @@ body[data-role="apps"] .apps { justify-content: safe center; }
 #media-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--media-title-size); }
 #media-time { color: var(--dock-muted); font-size: var(--media-time-size); font-variant-numeric: tabular-nums; }
 :root { --calendar-cell: 30px; --calendar-gap: 5px; }
+.app { touch-action: none; }
+.reordering .app { cursor: grabbing; }
+.app-dragging { background: rgba(178,202,235,.1); border-radius: 10px; box-shadow: inset 0 -2px var(--dock-indicator); }
 
 .media-progress-row { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
 #media-progress { flex: 1; min-width: 24px; height: 2px; overflow: hidden; border-radius: 2px; background: rgba(230,237,247,.15); }

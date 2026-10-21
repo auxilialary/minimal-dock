@@ -280,6 +280,11 @@ LRESULT WebViewHost::Accessibility(WPARAM wp, LPARAM lp) {
 
 bool WebViewHost::Input(UINT message, WPARAM wp, LPARAM lp) {
     if (!composition_) return false;
+    if (message == WM_CAPTURECHANGED || message == WM_CANCELMODE) {
+        if (role_ == L"apps" && leftPressed_) Post(L"{\"type\":\"native:capture-lost\"}");
+        leftPressed_ = false;
+        return false;
+    }
     if (message == WM_SETCURSOR && LOWORD(lp) == HTCLIENT) {
         HCURSOR cursor = nullptr;
         if (SUCCEEDED(composition_->get_Cursor(&cursor))) SetCursor(cursor);
@@ -292,6 +297,8 @@ bool WebViewHost::Input(UINT message, WPARAM wp, LPARAM lp) {
     if (message < WM_MOUSEFIRST || message > WM_MOUSELAST) {
         if (message != WM_MOUSELEAVE) return false;
     }
+    if (message == WM_LBUTTONDOWN) leftPressed_ = true;
+    if (message == WM_LBUTTONUP) leftPressed_ = false;
     POINT point = MouseInput::Position(owner_, message, lp);
     const UINT32 data = MouseInput::Data(message, wp);
     // Preserve the Win32 120-units-per-notch contract independently of OS line settings.

@@ -27,6 +27,7 @@
     }
     document.addEventListener("contextmenu", event => {
         event.preventDefault();
+        window.dockReorder?.cancel();
         if (role !== "popup") send("menu");
     });
     document.addEventListener("dragstart", event => event.preventDefault());

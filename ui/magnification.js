@@ -25,7 +25,7 @@
         previous = now;
         // Permanent padding bounds the total cosine-wave displacement. An
         // overflowing row keeps normal-sized, scrollable icons on small screens.
-        const maximum = reduced.matches || container.scrollWidth > container.clientWidth ? 1 : settings.max;
+        const maximum = window.dockDragging || reduced.matches || container.scrollWidth > container.clientWidth ? 1 : settings.max;
         const targets = DockWave.wave(centers, pointer, settings.size, maximum, settings.radius, settings.spacing);
         let moving = false;
         buttons.forEach((button, i) => {
@@ -54,7 +54,7 @@
         measure(); wake();
     }};
     container.addEventListener("pointermove", event => {
-        if (reduced.matches) return;
+        if (reduced.matches || window.dockDragging) return;
         pointer = event.clientX - innerWidth / 2;
         wake();
     });

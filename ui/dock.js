@@ -46,6 +46,7 @@
     }
 
     function renderApps(items) {
+        window.dockReorder?.cancel();
         const next = new Set(items.map(item => item.id));
 
         for (const [id, node] of nodes) {

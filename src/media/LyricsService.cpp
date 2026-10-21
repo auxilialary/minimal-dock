@@ -65,23 +65,34 @@ std::wstring Cooldown(const std::wstring& state, std::chrono::steady_clock::time
 struct LyricsService::State {
     std::mutex mutex; std::condition_variable wake; std::thread worker;
     bool stop = false, pending = false; unsigned generation = 0;
+    unsigned attempts = 0;
+    std::chrono::steady_clock::time_point deadline{};
     MediaSnapshot track; std::wstring result;
     Transport transport;
+    std::function<void()> changed;
     struct Cached { std::wstring key, result; std::chrono::steady_clock::time_point expires; };
     std::deque<Cached> cache;
     std::chrono::steady_clock::time_point nextRequest{};
     std::wstring cooldownState;
     std::chrono::steady_clock::time_point retryAfter{};
 };
-LyricsService::LyricsService(Transport transport) : state_(std::make_unique<State>()) {
+LyricsService::LyricsService(Transport transport, std::function<void()> changed) : state_(std::make_unique<State>()) {
     state_->transport = transport ? std::move(transport) : Fetch;
+    state_->changed = std::move(changed);
     auto* s = state_.get();
     s->worker = std::thread([s] {
         winrt::init_apartment(winrt::apartment_type::multi_threaded);
         for (;;) {
             MediaSnapshot track; unsigned generation;
             { std::unique_lock lock(s->mutex); s->wake.wait(lock, [&] { return s->stop || s->pending; });
-              if (s->stop) break; s->pending = false; track = s->track; generation = s->generation; }
+              if (s->stop) break;
+              generation = s->generation;
+              if (s->deadline != std::chrono::steady_clock::time_point{}) {
+                  if (s->wake.wait_until(lock, s->deadline, [&] { return s->stop || generation != s->generation; })) continue;
+                  s->result = L"{\"state\":\"loading\"}";
+                  if (s->changed) s->changed();
+              }
+              s->deadline = {}; s->pending = false; track = s->track; }
             auto key = track.title + L"\n" + track.artist + L"\n" + track.album + L"\n" + std::to_wstring(track.duration);
             std::wstring result; unsigned requests = 0;
             const auto lookupStarted = std::chrono::steady_clock::now();
@@ -149,7 +160,18 @@ LyricsService::LyricsService(Transport transport) : state_(std::make_unique<Stat
             if (result.empty()) result = L"{\"state\":\"not-found\"}";
             OutputDebugStringW((L"lyrics requests=" + std::to_wstring(requests) + L" elapsed_ms=" +
                 std::to_wstring(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lookupStarted).count()) + L" final=" + (result.find(L"\"state\":") == std::wstring::npos ? std::wstring(L"found") : std::wstring(Lyrics::String(Lyrics::JsonObject::Parse(result), L"state"))) + L"\n").c_str());
-            { std::lock_guard lock(s->mutex); if (!s->stop && generation == s->generation) s->result = std::move(result); }
+            { std::lock_guard lock(s->mutex); if (!s->stop && generation == s->generation) {
+                const auto failureState = Lyrics::String(Lyrics::JsonObject::Parse(result), L"state");
+                const bool transient = failureState == L"network" || failureState == L"temporary" || failureState == L"rate-limited";
+                if (transient && s->attempts < 3) {
+                    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1u << s->attempts++);
+                    s->deadline = std::max(deadline, s->retryAfter);
+                    s->pending = true;
+                    result = Cooldown(std::wstring(failureState), s->deadline);
+                } else if (transient) result.insert(result.size() - 1, L",\"exhausted\":true");
+                s->result = std::move(result);
+                if (s->changed) s->changed();
+            } }
         }
         winrt::uninit_apartment();
     });
@@ -161,8 +183,10 @@ LyricsService::~LyricsService() {
 void LyricsService::Request(const MediaSnapshot& track) {
     std::lock_guard lock(state_->mutex); ++state_->generation; state_->track = track;
     state_->result.clear(); state_->pending = true; state_->wake.notify_one();
+    state_->attempts = 0; state_->deadline = {};
 }
 void LyricsService::Invalidate() {
     std::lock_guard lock(state_->mutex); ++state_->generation; state_->pending = false; state_->result.clear(); state_->wake.notify_one();
+    state_->deadline = {}; state_->attempts = 0;
 }
 std::wstring LyricsService::Read() { std::lock_guard lock(state_->mutex); return std::exchange(state_->result, {}); }

@@ -29,6 +29,7 @@ private:
     HWND owner_ = nullptr;
     std::wstring role_;
     bool trackingMouse_ = false;
+    bool leftPressed_ = false;
     int displayed_ = -1;
     EventRegistrationToken cursorToken_{};
     Microsoft::WRL::ComPtr<IUnknown> visualTarget_;

@@ -264,6 +264,7 @@
   <ItemGroup>
     <ClCompile Include="src\app\Popups.cpp" />
     <ClCompile Include="src\app\PopupLyrics.cpp" />
+    <ClCompile Include="src\app\PopupMenu.cpp" />
     <ClCompile Include="src\app\PopupDismiss.cpp" />
     <ClCompile Include="src\audio\AudioMixer.cpp" />
     <ClInclude Include="src\app\Popups.h" />

@@ -14,12 +14,17 @@
     // Acknowledge the new surface only after DOM replacement and a paint opportunity.
     let presentation = 0;
     window.chrome?.webview?.addEventListener('message', ({data}) => {
-        if (!['lyrics', 'calendar', 'mixer', 'tooltip', 'popup:hidden'].includes(data?.type)) return;
+        if (!['menu', 'lyrics', 'calendar', 'mixer', 'tooltip', 'popup:hidden'].includes(data?.type)) return;
         const ticket = ++presentation;
         if (data.type === 'popup:hidden' || data.revision === undefined) return;
         requestAnimationFrame(() => requestAnimationFrame(() => {
-            if (ticket === presentation) send('popup:present:' + data.revision);
+            if (ticket === presentation) send('popup:present:' + data.revision +
+                (data.type === 'calendar' ? ' ' + innerWidth + ' ' + innerHeight : ''));
         }));
+    });
+    window.addEventListener('resize', () => {
+        if (revision !== undefined) requestAnimationFrame(() => requestAnimationFrame(() =>
+            send('popup:present:' + revision + ' ' + innerWidth + ' ' + innerHeight)));
     });
     const fallbackIcon = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--dock-text').trim()}" stroke-width="1.5" stroke-linejoin="round" d="M4 9v6h4l5 4V5L8 9H4zm13 0a5 5 0 0 1 0 6"/></svg>`);
     let mode = '', dragging = null, frame = 0, pending = new Map(), lastSize = '';
@@ -62,12 +67,12 @@
     }
     window.chrome?.webview?.addEventListener('message', event => {
         const data = event.data;
-        if (['lyrics','calendar','mixer','tooltip','popup:hidden'].includes(data?.type)) revision = data.revision;
+        if (['menu','lyrics','calendar','mixer','tooltip','popup:hidden'].includes(data?.type)) revision = data.revision;
         if (data?.type === 'popup:hidden') {
             mode = ''; tooltip.hidden = mixer.hidden = true; cancelAnimationFrame(frame);
             clearMixer(); return;
         }
-        if (data?.type === 'calendar' || data?.type === 'lyrics') { mode = ''; tooltip.hidden = mixer.hidden = true; clearMixer(); return; }
+        if (['menu','calendar','lyrics'].includes(data?.type)) { mode = ''; tooltip.hidden = mixer.hidden = true; clearMixer(); return; }
         if (!['tooltip', 'mixer'].includes(data?.type)) return;
         const changed = mode !== data.type; mode = data.type;
         if (changed) clearMixer();

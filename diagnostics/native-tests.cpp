@@ -15,6 +15,7 @@
 void Check(bool condition, const char* message) {
     if (!condition) { std::fprintf(stderr, "FAIL: %s\n", message); std::exit(1); }
 }
+#include "app-order-fixtures.h"
 HICON MakeIcon(bool legacy) {
     BITMAPINFO info{};
     info.bmiHeader = { sizeof(BITMAPINFOHEADER), 2, -2, 1, 32, BI_RGB, 0, 0, 0, 0, 0 };
@@ -156,6 +157,7 @@ int main() {
         }
         stream->Release();
     }
+    AppOrderFixtures();
     Gdiplus::GdiplusShutdown(token);
     CoUninitialize();
     std::printf("PASS: %d monitor/DPI/count layouts; modern and legacy icon PNG alpha/color round trips\n", layouts);

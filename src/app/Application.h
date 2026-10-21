@@ -15,6 +15,7 @@
 #include "../windows/EdgeTrigger.h"
 #include "../windows/IslandLayout.h"
 #include "../media/MediaService.h"
+#include "../windows/AppOrder.h"
 
 static_assert(MediaService::Changed != EdgeTrigger::Enter &&
     MediaService::Changed != EdgeTrigger::Pointer, "Media events must bypass the visibility input handler");
@@ -36,6 +37,7 @@ private:
     void PublishMedia();
     void Command(const std::wstring& command);
     void ShowMenu();
+    void MenuAction(unsigned selected);
     void Stop();
     bool VisibilityMessage(UINT message, WPARAM wp);
     bool ApplyVisibility(const IslandLayout& layout, RECT monitor, bool sameMonitor);
@@ -48,7 +50,7 @@ private:
     HWND externalForeground_ = nullptr;
     HWINEVENTHOOK geometryHook_ = nullptr;
     UINT taskbarCreated_ = 0;
-    bool edgeReveal_ = false, dockVisible_ = false, hiding_ = false, menuOpen_ = false;
+    bool edgeReveal_ = false, dockVisible_ = false, hiding_ = false;
     bool groupReveal_ = false;
 
     std::shared_ptr<int> lifetime_ = std::make_shared<int>(0);
@@ -58,6 +60,7 @@ private:
     int mediaWidth_ = 220;
     bool mediaVisible_ = false;
     WindowInventory tracker_;
+    AppOrder appOrder_;
     TaskbarManager taskbar_;
     Watchdog watchdog_;
     Popups popups_;

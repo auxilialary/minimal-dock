@@ -1,0 +1,9 @@
+#dock-menu[hidden] { display: none; }
+#dock-menu { padding: 8px; display: grid; gap: 2px; max-height: 100vh; overflow: auto; }
+#dock-menu button { position: relative; min-height: 32px; padding: 0 12px 0 26px; text-align: left; border-radius: 7px; font-size: 12px; }
+#dock-menu button:hover, #dock-menu button:focus-visible { background: rgba(210,225,245,.09); }
+#dock-menu button[aria-checked="true"]::before { content: '✓'; position: absolute; left: 9px; color: var(--dock-indicator); }
+#dock-menu button[aria-haspopup]::after { content: '›'; position: absolute; right: 12px; }
+#dock-menu button.menu-child { margin-left: 12px; font-size: 11px; }
+.menu-submenu { display: grid; gap: 2px; border-left: 1px solid rgba(178,202,235,.15); margin-left: 16px; }
+#dock-menu button:disabled { color: var(--dock-muted); opacity: .5; }

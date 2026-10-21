@@ -30,7 +30,7 @@
         <nav aria-label="Calendar navigation"><button id="calendar-prev" aria-label="Previous month">‹</button><button id="calendar-month" aria-label="Return to today"></button><button id="calendar-next" aria-label="Next month">›</button></nav>
         <div id="calendar-weekdays" aria-hidden="true"></div><div id="calendar-days" role="grid" aria-label="Month"></div>`;
     const grid = host.querySelector('#calendar-days'), month = host.querySelector('#calendar-month');
-    let preferences = {}, openedDate = '';
+    let preferences = {};
     let locale, firstDay = 1, hour12, selected = new Date(), shown = new Date(), timer = 0;
     const key = d => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     function render(focus = false) {
@@ -70,13 +70,22 @@
             grid.append(row);
         }
         if (focus) grid.querySelector('[tabindex="0"]')?.focus();
-        send('popup:size:320 ' + Math.ceil(host.getBoundingClientRect().height));
+        measure();
     }
+    let measured = '';
+    function measure() {
+        if (host.hidden) return;
+        const size = '320 ' + Math.ceil(host.scrollHeight + 2);
+        if (size !== measured) { measured = size; send('popup:size:' + size); }
+    }
+    new ResizeObserver(measure).observe(host);
+    window.addEventListener('resize', measure);
+    document.fonts.ready.then(measure);
     function tick() {
         clearTimeout(timer); if (host.hidden) return;
         const now = new Date();
         host.querySelector('#calendar-time').textContent = preferences.timePattern ? formatTime(now,preferences.timePattern,preferences.am,preferences.pm) : new Intl.DateTimeFormat(locale,{hour:'numeric',minute:'2-digit',second:'2-digit',hour12}).format(now);
-        host.querySelector('#calendar-date').textContent = key(now) === openedDate && preferences.date ? preferences.date : new Intl.DateTimeFormat(locale,{dateStyle:'full',calendar:'gregory'}).format(now);
+        host.querySelector('#calendar-date').textContent = new Intl.DateTimeFormat('en-US',{dateStyle:'full',calendar:'gregory'}).format(now);
         timer = setTimeout(tick,1000 - Date.now()%1000);
     }
     host.querySelector('#calendar-prev').onclick = () => { selected = shown = moveMonth(shown,-1); render(); };
@@ -89,11 +98,11 @@
         if (document.activeElement === edge) { e.preventDefault(); (e.shiftKey ? controls.at(-1) : controls[0]).focus(); }
     });
     window.chrome?.webview?.addEventListener('message', ({data}) => {
-        if (data?.type !== 'calendar') { if (['lyrics','mixer','tooltip','popup:hidden'].includes(data?.type)) { host.hidden = true; clearTimeout(timer); } return; }
-        revision = data.revision;
+        if (data?.type !== 'calendar') { if (['menu','lyrics','mixer','tooltip','popup:hidden'].includes(data?.type)) { host.hidden = true; clearTimeout(timer); } return; }
+        revision = data.revision; measured = '';
         const opening = host.hidden;
-        preferences = data; openedDate = key(new Date());
-        locale = data.locale || undefined; firstDay = data.firstDay ?? 1; hour12 = data.hour12;
+        preferences = data;
+        locale = 'en-US'; firstDay = data.firstDay ?? 1; hour12 = data.hour12;
         host.hidden = false;
         if (opening) { selected = shown = new Date(); host.classList.remove('popup-enter'); void host.offsetWidth; host.classList.add('popup-enter'); }
         render(opening); tick();

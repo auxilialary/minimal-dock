@@ -18,6 +18,7 @@ std::wstring Row(const wchar_t* title = L"Song") {
 }
 #include "lyrics-soundcloud-fixtures.h"
 #include "lyrics-title-only-fixtures.h"
+#include "lyrics-recovery-fixtures.h"
 int main() {
     winrt::init_apartment();
     struct Apartment { ~Apartment() { winrt::uninit_apartment(); } } apartment;
@@ -206,6 +207,7 @@ int main() {
         auto popup = CalculatePopup(work, anchor, -890, MulDiv(380,dpi,96), MulDiv(420,dpi,96), 10);
         Check(popup.left >= work.left && popup.right <= work.right && popup.top >= work.top && popup.bottom <= anchor.top);
     }
+    RecoveryFixtures(track);
     SoundCloudFixtures();
     TitleOnlyFixtures();
     std::puts("PASS lyrics native: response/matching, null/plain, fallback, cache, stale replacement, invalidation, 429, failure, oversize, DPI placement");

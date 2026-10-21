@@ -11,7 +11,7 @@ void Popups::EndDismiss() {
     if (hookOwner_ == this) hookOwner_ = nullptr;
 }
 LRESULT CALLBACK Popups::OutsideClick(int code, WPARAM wp, LPARAM lp) {
-    if (code == HC_ACTION && wp == WM_LBUTTONDOWN && hookOwner_) {
+    if (code == HC_ACTION && (wp == WM_LBUTTONDOWN || wp == WM_RBUTTONDOWN) && hookOwner_) {
         auto* self = hookOwner_;
         const auto point = reinterpret_cast<const MSLLHOOKSTRUCT*>(lp)->pt;
         RECT bounds{}, anchor{};

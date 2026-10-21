@@ -118,7 +118,7 @@ bool Application::VisibilityMessage(UINT message, WPARAM wp) {
     if (message == WM_TIMER && wp == LeaveTimer) {
         KillTimer(owner, LeaveTimer);
         POINT point{};
-        if (menuOpen_ || !GetCursorPos(&point)) return true;
+        if (popups_.MenuOpen() || !GetCursorPos(&point)) return true;
         if (GetCapture() && OwnWindow(GetCapture())) return true;
         if (Inside(systemWindow_.Handle(), point) || Inside(appsWindow_.Handle(), point) ||
             Inside(mediaWindow_.Handle(), point) || (popups_.Interactive() && Inside(popups_.Handle(), point))) return true;

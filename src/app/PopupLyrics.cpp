@@ -15,7 +15,6 @@ void Popups::MediaChanged(const MediaSnapshot& track, HWND anchor) {
     if (!track.playing) { Hide(); return; }
     if (changed) {
         lyricsResult_.clear(); lyrics_->Request(track);
-        SetTimer(window_.Handle(), 0x502, 100, nullptr);
     }
     Position(380, 420); PublishLyrics();
 }

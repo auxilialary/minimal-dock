@@ -94,6 +94,7 @@ int Application::Run(HINSTANCE instance) {
 
     eventWindow = systemWindow_.Handle();
     visibilityMode_ = Visibility::Load();
+    appOrder_.Load();
     if (!edge_.Create(eventWindow)) return 1;
     taskbarCreated_ = RegisterWindowMessageW(L"TaskbarCreated");
     geometryHook_ = SetWinEventHook(EVENT_OBJECT_LOCATIONCHANGE, EVENT_OBJECT_LOCATIONCHANGE,
@@ -247,7 +248,7 @@ void Application::Update() {
     }
 
     if (appsView_.Ready()) {
-        auto json = WebBridge::AppsJson(tracker_.Apps());
+        auto json = WebBridge::AppsJson(appOrder_.Sort(tracker_.Apps()));
         if (json != lastAppsJson_) { appsView_.Post(json); lastAppsJson_ = std::move(json); }
     }
 
@@ -281,6 +282,9 @@ void Application::Update() {
 
 void Application::Command(const std::wstring& command) {
     if (!dockVisible_ && command != L"exit") return;
+    if (command.rfind(L"reorder:", 0) == 0) {
+        appOrder_.Set(command.substr(7), tracker_.Apps()); lastAppsJson_.clear(); Update(); return;
+    }
     if (popups_.Command(command, tracker_.Apps())) return;
     popups_.Hide();
     if (command == L"menu") {

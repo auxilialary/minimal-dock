@@ -7,7 +7,7 @@ struct LyricsReply { unsigned status = 0; std::wstring body; unsigned retrySecon
 class LyricsService {
 public:
     using Transport = std::function<LyricsReply(const std::wstring&)>;
-    explicit LyricsService(Transport transport = {});
+    explicit LyricsService(Transport transport = {}, std::function<void()> changed = {});
     ~LyricsService();
     void Request(const MediaSnapshot& track);
     void Invalidate();
