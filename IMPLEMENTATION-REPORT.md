@@ -59,7 +59,9 @@ Unknown apps append in inventory order; saved closed apps are retained within
 the bound. Reset deletes that value. Native tests use a separate temporary key.
 
 The custom English menu reuses the single composition popup, GPU backdrop and
-native outline. It replaces TrackPopupMenu, supports arrows/Home/End/Enter,
+native outline. Opening and dismissal use restrained fades; the closing surface
+stops accepting pointer input immediately and honors reduced-motion settings.
+It replaces TrackPopupMenu, supports arrows/Home/End/Enter,
 Escape/outside clicks and an expandable Visibility section with Right/Left
 navigation. Autostart is inspected again before changes; visibility still uses
 the existing persisted policy. Popup revision cancellation prevents old content

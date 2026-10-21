@@ -41,7 +41,7 @@ bool Popups::EnsureView() {
     return initialized_;
 }
 void Popups::Message(UINT message, WPARAM wp, LPARAM) {
-    if (message == OutsideMessage && wp == revision_ && Interactive()) Hide();
+    if (message == OutsideMessage && wp == revision_ && Interactive()) Dismiss();
     if (message == LyricsMessage && mode_ == Mode::Lyrics) {
         auto result = lyrics_->Read();
         if (!result.empty()) { lyricsResult_ = std::move(result); PublishLyrics(); }
@@ -52,10 +52,10 @@ void Popups::Message(UINT message, WPARAM wp, LPARAM) {
         POINT point{}; RECT anchor{};
         const bool islandClick = mode_ == Mode::Lyrics && GetCursorPos(&point) &&
             GetWindowRect(mediaAnchor_, &anchor) && PtInRect(&anchor, point) && (GetAsyncKeyState(VK_LBUTTON) & 0x8000);
-        if (!islandClick) Hide();
+        if (!islandClick) Dismiss();
     }
     if ((message == WM_TIMECHANGE || message == WM_SETTINGCHANGE) && mode_ == Mode::Calendar) Publish();
-    if (message == WM_CLOSE || (message == WM_KEYDOWN && wp == VK_ESCAPE)) Hide();
+    if (message == WM_CLOSE || (message == WM_KEYDOWN && wp == VK_ESCAPE)) Dismiss();
     if (message == WM_TIMER && wp == ExitTimer) {
         KillTimer(window_.Handle(), ExitTimer);
         if (mode_ == Mode::Hidden) {
@@ -108,7 +108,7 @@ bool Popups::Command(const std::wstring& command, const std::vector<RunningApp>&
     if (!initialized_) return false;
     if (command.rfind(L"menu:action:", 0) == 0) {
         unsigned action = 0; std::wistringstream input(command.substr(12));
-        if (mode_ == Mode::Menu && (input >> action)) { auto handler = menuAction_; Hide(); if (handler) handler(action); }
+        if (mode_ == Mode::Menu && (input >> action)) { auto handler = menuAction_; Dismiss(); if (handler) handler(action); }
         return true;
     }
     if (command == L"lyrics" || command == L"mixer" || command.rfind(L"calendar:", 0) == 0 ||
@@ -177,7 +177,7 @@ bool Popups::Command(const std::wstring& command, const std::vector<RunningApp>&
         Hide(); mode_ = Mode::Calendar; window_.PopupMode(true);
         Position(320, 340); Publish(); Present(); return true;
     }
-    if (command == L"popup:close") { Hide(); return true; }
+    if (command == L"popup:close") { Dismiss(); return true; }
     if (command == L"tooltip:hide") {
         if (mode_ == Mode::Tooltip) Hide(false);
         return true;
@@ -271,7 +271,8 @@ void Popups::Refresh(const std::vector<RunningApp>& apps) {
     } else if (MixerOpen()) { Position(width_, height_); Publish(); }
 }
 void Popups::Hide(bool immediate) {
-    bool wasMixer = Interactive();
+    const bool wasMenu = mode_ == Mode::Menu;
+    bool wasMixer = Interactive() && !wasMenu;
     EndDismiss();
     if (lyrics_) lyrics_->Invalidate();
     mode_ = Mode::Hidden; hovered_ = nullptr;
@@ -285,9 +286,13 @@ void Popups::Hide(bool immediate) {
         KillTimer(window_.Handle(), ExitTimer); window_.Show(false);
     }
     else {
+        if (wasMenu) window_.PopupMode(false);
         fadingOut_ = true;
-        window_.Fade(false, 160);
-        if (!SetTimer(window_.Handle(), ExitTimer, 160, nullptr)) window_.Show(false);
+        BOOL animations = TRUE;
+        if (wasMenu) SystemParametersInfoW(SPI_GETCLIENTAREAANIMATION, 0, &animations, 0);
+        const UINT duration = animations ? 160u : 0u;
+        window_.Fade(false, duration);
+        if (!SetTimer(window_.Handle(), ExitTimer, duration ? duration : 1, nullptr)) window_.Show(false);
     }
 }
 void Popups::Stop() {

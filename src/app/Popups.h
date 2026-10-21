@@ -23,6 +23,7 @@ public:
     HWND Handle() const { return window_.Handle(); }
 private:
     bool EnsureView();
+    void Dismiss() { Hide(mode_ != Mode::Menu); }
     void PublishLyrics();
     void BeginDismiss();
     void EndDismiss();
